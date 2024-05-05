@@ -1,2 +1,7 @@
-yaz: 1 a 1 \b 8 k 4 r 6 u 
-dur:
+yaz: 10 a 1 \b 8 k 4 r 6 u 
+sil: 4 a
+sonagit:
+yaz: 3 b 4 c 1 \n
+yaz: 1 c
+sonagit:
+

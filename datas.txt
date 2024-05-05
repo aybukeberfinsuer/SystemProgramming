@@ -1,0 +1,36 @@
+Satır 1: yaz: 10 a 1 \b 8 k 4 r 6 u 
+
+Kelime 1: yaz:
+Kelime 2: 10
+Kelime 3: a
+Kelime 4: 1
+Kelime 5: \b
+Kelime 6: 8
+Kelime 7: k
+Kelime 8: 4
+Kelime 9: r
+Kelime 10: 6
+Kelime 11: u
+Satır 2: sil: 4 a
+
+Kelime 1: sil:
+Kelime 2: 4
+Kelime 3: a
+Satır 3: sonagit:
+
+Kelime 1: sonagit:
+Satır 4: yaz: 3 b 4 c 1 \n
+
+Kelime 1: yaz:
+Kelime 2: 3
+Kelime 3: b
+Kelime 4: 4
+Kelime 5: c
+Kelime 6: 1
+Kelime 7: \n
+Satır 5: sonagit:
+
+Kelime 1: sonagit:
+Satır 6: dur:
+
+Kelime 1: dur:
