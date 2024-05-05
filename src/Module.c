@@ -3,23 +3,6 @@
 #include <string.h>
 #include "Module.h"
 
-
-void processDeleteCommand(IS is, FILE *os) {
-    // 'sil:' komutunu işle
-}
-void processStopCommand(IS is, FILE *os) {
-    // 'sil:' komutunu işle
-}
-
-
-void processGoToEndCommand(IS is, FILE *os) {
-    // Dosyanın sonuna git
-    if (fseek(os, 0, SEEK_END) != 0) {
-        perror("Dosya sonuna gitme hatası");
-        exit(1);
-    }
-}
-
 void processWriteCommand(IS is, FILE *os) {
     for (int i = 1; i < is->NF; i += 2) {
         int count = atoi(is->fields[i]);  // Kelimenin sayısını al (örn. 10)
@@ -41,6 +24,27 @@ void processWriteCommand(IS is, FILE *os) {
     }
     fflush(os);  // Her yazma işleminden sonra buffer'ı boşalt
 }
+
+
+
+
+
+void processDeleteCommand(IS is, FILE *os) {
+    // 'sil:' komutunu işle
+}
+void processStopCommand(IS is, FILE *os) {
+    // 'sil:' komutunu işle
+}
+
+void processGoToEndCommand(IS is, FILE *os) {
+    // Dosyanın sonuna git
+    if (fseek(os, 0, SEEK_END) != 0) {
+        perror("Dosya sonuna gitme hatası");
+        exit(1);
+    }
+}
+
+
 
 
 void processCommands(const char* inputFileName, const char* outputFileName) {
