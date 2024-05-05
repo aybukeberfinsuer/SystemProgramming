@@ -1,1 +1,2 @@
-hello benim adım sefa
+yaz: 1 a 1 \b 8 k 4 r 6 u 
+dur:

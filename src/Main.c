@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "Module.h"
 #include "../lib/libfdr/fields.h"
 
 int main(int argc, char *argv[]) {
@@ -8,31 +10,49 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    IS kilit = new_inputstruct(argv[1]); // İlk argüman olarak girilen dosya yolu alınır
-    if (kilit == NULL) {
-        fprintf(stderr, "%s dosyasi bulunamadi\n", argv[1]);
+    // Okunacak dosyanın varlığı ve okuma izni kontrolü
+    FILE *temp_file = fopen(argv[1], "r");
+    if (temp_file == NULL) {
+        fprintf(stderr, "%s dosyasi bulunamadi ya da okuma izni yok\n", argv[1]);
+        return 1;
+    }
+    fclose(temp_file); // Dosyayı kontrol için açıp kapattık
+
+    IS is_ = new_inputstruct(argv[1]); // İlk argüman olarak girilen dosya yolu alınır
+    if (is_ == NULL) {
+        fprintf(stderr, "%s dosyasi işlenemiyor\n", argv[1]);
         return 1;
     }
 
-    // İkinci argüman olarak girilen dosya yoluna yazılacak işlemleri yapın
-    FILE *yazilacak_dosya = fopen(argv[2], "w");
-    if (yazilacak_dosya == NULL) {
-        fprintf(stderr, "%s dosyasi olusturulamadi\n", argv[2]);
+    // Çıktı dosyasını sadece varsa aç
+    FILE *os_ = fopen(argv[2], "r");
+    if (os_ == NULL) {
+        fprintf(stderr, "%s dosyasi bulunamadi\n", argv[2]);
+        jettison_inputstruct(is_);
+        return 1;
+    }
+    fclose(os_);  // Kontrol için açılan dosyayı kapat
+
+    // Çıktı dosyasını yazma modunda aç
+    os_ = fopen(argv[2], "w");
+    if (os_ == NULL) {
+        fprintf(stderr, "%s dosyasi yazma için açılamadı\n", argv[2]);
+        jettison_inputstruct(is_);
         return 1;
     }
 
-    // Okuma ve yazma işlemleri
-    int i;
-    while (get_line(kilit) >= 0) {
-        for (i = 0; i < kilit->NF; i++) {
-            fprintf(yazilacak_dosya, "%s ", kilit->fields[i]);
+    while (get_line(is_) >= 0) {
+        fprintf(os_, "Satır %d: %s\n", is_->line, is_->text1); // Dosyaya satır numarası ve metni yazdır
+        for (int i = 0; i < is_->NF; i++) {
+            fprintf(os_, "Kelime %d: %s\n", i + 1, is_->fields[i]); // Dosyaya her kelimeyi yazdır
         }
-        fprintf(yazilacak_dosya, "\n");
     }
+
+    // (Burada dosya işlemlerinizi yapabilirsiniz.)
 
     // Dosyaları kapatın
-    fclose(yazilacak_dosya);
-    jettison_inputstruct(kilit);
+    fclose(os_);
+    jettison_inputstruct(is_);
 
     printf("Islem tamamlandi\n");
 
