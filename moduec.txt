@@ -1,0 +1,59 @@
+#include "Module.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void processWriteCommand(Dllist buffer, const char* text, int count) {
+    for (int i = 0; i < count; i++) {
+        Jval jval;
+        // Özel karakterler için kontrol
+        if (strcmp(text, "\\n") == 0) {
+            jval.s = strdup("\n");  // Yeni satır karakteri
+        } else if (strcmp(text, "\\b") == 0) {
+            jval.s = strdup(" ");  // Boşluk karakteri olarak yorumla
+        } else {
+            jval.s = strdup(text);  // Normal metin
+        }
+        dll_append(buffer, jval);
+    }
+}
+
+void processStopCommand(Dllist buffer, FILE *os) {
+    Dllist node;
+
+    dll_traverse(node, buffer) {
+        fprintf(os, "%s", jval_s(node->val));
+    }
+    fflush(os);
+    free_dllist(buffer);  // Listeyi ve içindeki tüm elemanları temizle
+}
+
+void processCommands(const char* inputFileName, const char* outputFileName) {
+    Dllist buffer = new_dllist();  // Yeni boş bir liste oluştur
+    IS is = new_inputstruct(inputFileName);
+
+    if (is == NULL) {
+        fprintf(stderr, "%s dosyasi bulunamadi ya da okuma izni yok\n", inputFileName);
+        exit(1);
+    }
+
+    FILE *os = fopen(outputFileName, "w");
+    if (os == NULL) {
+        fprintf(stderr, "%s dosyasi yazma için açılamadı\n", outputFileName);
+        jettison_inputstruct(is);
+        exit(1);
+    }
+
+    while (get_line(is) >= 0) {
+        if (strcmp(is->fields[0], "yaz:") == 0) {
+            int count = atoi(is->fields[1]);
+            processWriteCommand(buffer, is->fields[2], count);
+        } else if (strcmp(is->fields[0], "dur:") == 0) {
+            processStopCommand(buffer, os);
+            break;
+        }
+    }
+
+    fclose(os);
+    jettison_inputstruct(is);
+}
