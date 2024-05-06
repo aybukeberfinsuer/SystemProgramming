@@ -3,6 +3,7 @@
 #include <string.h>
 #include "Module.h"
 #include "../lib/libfdr/fields.h"
+#include "../lib/libfdr/dllist.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {

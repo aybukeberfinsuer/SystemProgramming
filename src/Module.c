@@ -3,50 +3,58 @@
 #include <string.h>
 #include "Module.h"
 
-void processWriteCommand(IS is, FILE *os) {
+// Yazma işlemi için verileri listeye ekler
+void processWriteCommand(Dllist buffer, IS is) {
     for (int i = 1; i < is->NF; i += 2) {
         int count = atoi(is->fields[i]);  // Kelimenin sayısını al (örn. 10)
         char *ch = is->fields[i+1];       // Yazılacak karakteri al (örn. 'a')
 
-        if (strcmp(ch, "\\n") == 0) {  // Eğer karakter yeni satır ise
-            for (int j = 0; j < count; j++) {
-                fprintf(os, "\n");  // Belirtilen sayıda yeni satır ekle
+        for (int j = 0; j < count; j++) {
+            Jval val;
+            if (strcmp(ch, "\\n") == 0) {  // Yeni satır karakteri kontrolü
+                val = new_jval_s(strdup("\n"));  // Yeni satır karakteri olarak ekle
+            } else if (strcmp(ch, "\\b") == 0) {  // Boşluk karakteri kontrolü
+                val = new_jval_s(strdup(" "));  // Boşluk karakteri olarak ekle
+            } else {
+                val = new_jval_s(strdup(ch));  // Normal karakterleri ekle
             }
-        } else if (strcmp(ch, "\\b") == 0) {  // Eğer karakter boşluk ise
-            for (int j = 0; j < count; j++) {
-                fprintf(os, " ");  // Belirtilen sayıda boşluk ekle
-            }
-        } else {  // Normal karakterler için
-            for (int j = 0; j < count; j++) {
-                fprintf(os, "%s", ch);  // Karakteri belirtilen sayıda yaz
-            }
+            dll_append(buffer, val);  // Listeye ekle
         }
     }
-    fflush(os);  // Her yazma işleminden sonra buffer'ı boşalt
 }
 
+// Silme işlemi için verileri listeden kaldırır
+void processDeleteCommand(Dllist buffer, IS is) {
+    int count = atoi(is->fields[1]);
+    char *ch = is->fields[2];
 
-
-
-
-void processDeleteCommand(IS is, FILE *os) {
-    // 'sil:' komutunu işle
-}
-void processStopCommand(IS is, FILE *os) {
-    // 'sil:' komutunu işle
-}
-
-void processGoToEndCommand(IS is, FILE *os) {
-    // Dosyanın sonuna git
-    if (fseek(os, 0, SEEK_END) != 0) {
-        perror("Dosya sonuna gitme hatası");
-        exit(1);
+    Dllist tmp;
+    dll_traverse(tmp, buffer) {
+        if (count == 0) break;  // Silinecek miktar kadar silme işlemi yapıldıysa döngüden çık
+        if (strcmp(jval_s(tmp->val), ch) == 0) {
+            Dllist to_delete = tmp;
+            tmp = tmp->blink;  // Geriye doğru ilerle
+            dll_delete_node(to_delete);
+            count--;
+        }
     }
 }
 
+// Dosyanın sonuna gitmek için bir işlem yapar
+void processGoToEndCommand(Dllist buffer, FILE *os) {
+    fseek(os, 0, SEEK_END);  // Dosyanın sonuna git
+}
 
+// Dur komutunda tüm listeyi dosyaya yazdırır ve listeyi temizler
+void processStopCommand(Dllist buffer, FILE *os) {
+    Dllist node;
+    dll_traverse(node, buffer) {
+        fprintf(os, "%s", jval_s(node->val));  // Listede bulunan her öğeyi dosyaya yaz
+    }
+    free_dllist(buffer);  // Listeyi boşalt ve belleği serbest bırak
+}
 
-
+// Komutları işler ve uygun işlevleri çağırır
 void processCommands(const char* inputFileName, const char* outputFileName) {
     IS is = new_inputstruct(inputFileName);
     if (is == NULL) {
@@ -61,19 +69,22 @@ void processCommands(const char* inputFileName, const char* outputFileName) {
         exit(1);
     }
 
+    Dllist buffer = new_dllist();  // Yeni bağlı liste oluştur
+
     while (get_line(is) >= 0) {
         if (strcmp(is->fields[0], "yaz:") == 0) {
-            processWriteCommand(is, os);
+            processWriteCommand(buffer, is);
         } else if (strcmp(is->fields[0], "sil:") == 0) {
-            processDeleteCommand(is, os);
+            processDeleteCommand(buffer, is);
         } else if (strcmp(is->fields[0], "sonagit:") == 0) {
-            processGoToEndCommand(is, os);
+            processGoToEndCommand(buffer, os);
         } else if (strcmp(is->fields[0], "dur:") == 0) {
-            processStopCommand(is, os);
+            processStopCommand(buffer, os);
             break;  // Döngüden çık
         }
     }
 
     fclose(os);
     jettison_inputstruct(is);
+    if (!dll_empty(buffer)) free_dllist(buffer);  // Eğer liste boş değilse temizle
 }

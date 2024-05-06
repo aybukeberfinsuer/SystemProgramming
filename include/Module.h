@@ -5,9 +5,9 @@
 #include "../lib/libfdr/dllist.h"
 
 void processCommands(const char* inputFileName, const char* outputFileName);
-void processWriteCommand(IS is, FILE *os);
-void processDeleteCommand(IS is, FILE *os);
-void processGoToEndCommand(IS is, FILE *os);
-void processStopCommand(IS is, FILE *os);
+void processWriteCommand(Dllist buffer, IS is);
+void processDeleteCommand(Dllist buffer, IS is);
+void processGoToEndCommand(Dllist buffer, FILE *os);
+void processStopCommand(Dllist buffer, FILE *os);
 
 #endif
