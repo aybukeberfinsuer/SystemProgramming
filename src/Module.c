@@ -84,6 +84,7 @@ void processCommands(const char* inputFileName, const char* outputFileName) {
         }
     }
 
+    printf("Islem tamamlandi.\n");
     fclose(os);
     jettison_inputstruct(is);
     if (!dll_empty(buffer)) free_dllist(buffer);  // Eğer liste boş değilse temizle
