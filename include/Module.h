@@ -7,7 +7,7 @@
 void processCommands(const char* inputFileName, const char* outputFileName);
 void processWriteCommand(Dllist buffer, IS is);
 void processDeleteCommand(Dllist buffer, IS is);
-void processGoToEndCommand(Dllist buffer, FILE *os);
+void processGoToEndCommand(Dllist buffer);
 void processStopCommand(Dllist buffer, FILE *os);
 
 #endif
